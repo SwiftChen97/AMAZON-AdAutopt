@@ -1,9 +1,11 @@
 import pandas as pd
 
+
 class SPModule:
     def __init__(self, file_path):
         self.file_path = file_path
-        self.data = self.load_data()
+        self.data = None
+        self.load_data()  # 直接调用加载数据方法，避免重复代码
 
     def load_data(self):
         """从包含'商品推广'的工作表名称中加载数据。"""
@@ -12,18 +14,31 @@ class SPModule:
             sheet_name = next((name for name in xls.sheet_names if "商品推广活动" in name), None)
             if sheet_name:
                 print(f"加载数据来自工作表: {sheet_name}")
-                return pd.read_excel(xls, sheet_name=sheet_name, engine="openpyxl")
+                self.data = pd.read_excel(xls, sheet_name=sheet_name, engine="openpyxl")
             else:
                 print("未找到匹配的工作表。")
-                return None
+            return self.data  # 返回加载的数据，方便外部知晓是否加载成功
+        except FileNotFoundError:
+            print(f"文件 {self.file_path} 不存在，请检查文件路径。")
+            return None
+        except pd.errors.ParserError:
+            print(f"文件 {self.file_path} 格式可能不正确，无法正确解析。")
+            return None
         except Exception as e:
-            print(f"加载数据出错: {e}")
+            print(f"加载数据时出现其他未知错误: {e}")
             return None
 
     def _get_pause_conditions(self):
         """定义暂停广告的条件。"""
         if self.data is None:
-            return pd.Series([False] * len(self.data))  # 无数据时返回False的序列
+            return pd.Series([False] * 0)  # 无数据时返回空的False序列
+
+        required_columns = ["点击量", "订单数量", "ACOS", "广告活动状态（仅供参考）",
+                            "广告组状态（仅供参考）", "状态", "SKU"]
+        # 先验证所需列是否都存在
+        if not all(col in self.data.columns for col in required_columns):
+            missing_cols = [col for col in required_columns if col not in self.data.columns]
+            raise ValueError(f"数据中缺少必要列: {', '.join(missing_cols)}")
 
         condition1 = (self.data["点击量"] > 25) & (self.data["订单数量"] == 0)
         condition2 = (self.data["订单数量"] < 6) & (self.data["ACOS"] > 60)
@@ -32,7 +47,7 @@ class SPModule:
     def pause_ad(self):
         """根据特定条件暂停广告，并仅保存修改后的行到新文件。"""
         if self.data is None:
-            print("数据未加载。")
+            print("数据未加载，无法执行暂停广告操作。")
             return
 
         # 筛选符合暂停条件的广告
