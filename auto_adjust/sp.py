@@ -32,7 +32,7 @@ class SPModule:
             print(f"加载数据时出现其他未知错误: {e}")
             return None
 
-    def pause_ad(self):
+    def pause_sp_product(self):
         """根据特定条件暂停广告，并仅保存修改后的行到新文件。"""
         if self.data is None:
             print("数据未加载，无法执行暂停广告操作。")
@@ -49,17 +49,44 @@ class SPModule:
             # 提取仅包含修改后的行
             modified_rows = self.data.loc[to_pause.index]
 
-            # 仅保存修改后的行到新文件
-            output_file_path = self.file_path.replace(".xlsx", "_SP_Product.xlsx")
-            try:
-                modified_rows.to_excel(output_file_path, index=False, engine="openpyxl")
-                print(f"包含修改行的文件已保存为: {output_file_path}")
-            except Exception as e:
-                print(f"保存更新文件出错: {e}")
+            # 获取用户输入的新文件名
+            # new_file_name = self.get_user_file_name()
+
+            # 构建新文件路径
+            output_file_path = self.file_path.rsplit('.', 1)[0] + '_' + 'SP商品暂停' + '.xlsx'
+
+            # 保存修改后的行到新文件
+            self.save_modified_rows(modified_rows, output_file_path)
         else:
             print("没有符合条件的广告需要暂停。")
 
-    def call_function(self, function_name):
+    # def get_user_file_name(self):
+    #     """
+    #     :return: 用户输入的新文件名
+    #     """
+    #     while True:
+    #         try:
+    #             new_file_name = input("请输入要保存的新文件名（无需输入扩展名）：")
+    #             if not new_file_name:
+    #                 raise ValueError("文件名不能为空，请重新输入。")
+    #             return new_file_name
+    #         except ValueError as e:
+    #             print(e)
+
+    def save_modified_rows(self, modified_rows, output_file_path):
+        """
+        将修改后的行保存到指定的新文件中。
+
+        :param modified_rows: 包含修改后的数据行的DataFrame
+        :param output_file_path: 要保存的新文件路径
+        """
+        try:
+            modified_rows.to_excel(output_file_path, index=False, engine="openpyxl")
+            print(f"包含修改行的文件已保存为: {output_file_path}")
+        except Exception as e:
+            print(f"保存更新文件出错: {e}")
+
+    def call_function(self,  function_name):
         """通过名称动态调用函数。"""
         func = getattr(self, function_name, None)
         if callable(func):
