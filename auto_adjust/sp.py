@@ -1,4 +1,8 @@
 import pandas as pd
+import conditions.condition as con
+import conditions.filters as filter
+from openpyxl import load_workbook
+from openpyxl.styles import numbers
 
 
 class SPModule:
@@ -28,22 +32,6 @@ class SPModule:
             print(f"加载数据时出现其他未知错误: {e}")
             return None
 
-    def _get_pause_conditions(self):
-        """定义暂停广告的条件。"""
-        if self.data is None:
-            return pd.Series([False] * 0)  # 无数据时返回空的False序列
-
-        required_columns = ["点击量", "订单数量", "ACOS", "广告活动状态（仅供参考）",
-                            "广告组状态（仅供参考）", "状态", "SKU"]
-        # 先验证所需列是否都存在
-        if not all(col in self.data.columns for col in required_columns):
-            missing_cols = [col for col in required_columns if col not in self.data.columns]
-            raise ValueError(f"数据中缺少必要列: {', '.join(missing_cols)}")
-
-        condition1 = (self.data["点击量"] > 25) & (self.data["订单数量"] == 0)
-        condition2 = (self.data["订单数量"] < 6) & (self.data["ACOS"] > 60)
-        return (condition1 | condition2)
-
     def pause_ad(self):
         """根据特定条件暂停广告，并仅保存修改后的行到新文件。"""
         if self.data is None:
@@ -51,15 +39,9 @@ class SPModule:
             return
 
         # 筛选符合暂停条件的广告
-        to_pause = self.data[
-            (self.data["广告活动状态（仅供参考）"] == "已启用") &
-            (self.data["广告组状态（仅供参考）"] == "已启用") &
-            (self.data["状态"] == "已启用") &
-            (self.data["SKU"].notna()) &
-            self._get_pause_conditions()
-        ]
+        to_pause = filter.sp_product_pause_filters(self.data, con.sp_product_pause)
 
-        # 检查是否有符合条件的行需要暂停
+        # 检查是否有按条件筛选的行需要暂停
         if not to_pause.empty:
             # 将符合条件的行的 "状态" 标记为 "已暂停"
             self.data.loc[to_pause.index, "状态"] = "已暂停"
