@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>亚马逊广告优化系统</title>
+</head>
+
+<body>
+    <h1>亚马逊广告优化系统</h1>
+    <form method="post">
+        <label for="file_path">请选择Excel文件路径：</label>
+        <input type="text" id="file_path" name="file_path" required>
+        <input type="button" value="浏览" onclick="openFileDialog()">
+
+        <label for="sp_function">请输入sp_function（可选，中文名）：</label>
+        <input type="text" id="sp_function" name="sp_function">
+
+        <input type="submit" value="执行优化">
+    </form>
+
+    <script>
+        function openFileDialog() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.xlsx';
+            input.onchange = function (e) {
+                document.getElementById('file_path').value = e.target.files[0].path;
+            };
+            input.click();
+        }
+    </script>
+</body>
+
+</html>
