@@ -44,6 +44,7 @@ class SPModule:
         if not to_pause.empty:
             # 将符合条件的行的 "状态" 标记为 "已暂停"
             self.data.loc[to_pause.index, "状态"] = "已暂停"
+            self.data.loc[to_pause.index, "操作"] = "Create"
             # 提取仅包含修改后的行
             modified_rows = self.data.loc[to_pause.index]
             # 获取上传文件所在目录（确保目录存在）
