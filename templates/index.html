@@ -4,19 +4,68 @@
 <head>
     <meta charset="UTF-8">
     <title>亚马逊广告优化系统</title>
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            width: 500px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        input[type="text"],
+        input[type="button"],
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        input[type="button"] {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+
+        input[type="submit"] {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
     <h1>亚马逊广告优化系统</h1>
     <form method="post">
-        <label for="file_path">请选择Excel文件路径：</label>
+        <label for="file_path">后台广告数据文件路径：</label>
         <input type="text" id="file_path" name="file_path" required>
         <input type="button" value="浏览" onclick="openFileDialog()">
 
-        <label for="sp_function">请输入sp_function（可选，中文名）：</label>
+        <label for="sp_function">SP广告优化：</label>
         <input type="text" id="sp_function" name="sp_function">
 
-        <input type="submit" value="执行优化">
+        <input type="submit" 值="执行优化">
     </form>
 
     <script>
@@ -25,7 +74,8 @@
             input.type = 'file';
             input.accept = '.xlsx';
             input.onchange = function (e) {
-                document.getElementById('file_path').value = e.target.files[0].path;
+                const file = e.target.files[0];
+                document.getElementById('file_path').value = file.name;
             };
             input.click();
         }
